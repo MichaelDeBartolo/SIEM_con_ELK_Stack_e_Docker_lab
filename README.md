@@ -21,39 +21,17 @@ graph LR
     B --> C[Elasticsearch Container]
     B --> D[Kibana Container]
     C --> D
-Hai assolutamente ragione, Michael! Mi scuso per l'errore di formattazione che si è intrufolato.
 
-Il problema "Parse error on line 8: ...Expecting 'SEMI', 'NEWLINE', 'EOF', 'AMP', 'START_LINK', 'LINK', 'LINK_ID', got 'NODE_STRING'" indica che il blocco di codice Mermaid (il diagramma) non è stato chiuso correttamente o c'era del testo immediatamente prima o dopo che confondeva il parser di Markdown. Inoltre, alcune delle tue etichette come "Bash" e "YAML" prima dei blocchi di codice non sono standard Markdown e possono causare problemi.
 
-Ho corretto questo errore e ho ripulito l'intero documento per assicurare che sia perfettamente formattato in Markdown, senza errori di parsing, e pronto per un copia-incolla diretto nel tuo README.md su GitHub.
 
-Ecco il testo finale e corretto:
 
-Markdown
 
-# SIEM Lab Semplificato con ELK Stack e Docker
 
-Questo repository illustra la configurazione di una pipeline SIEM (Security Information and Event Management) di base. Utilizzeremo **Elasticsearch** e **Kibana** containerizzati con Docker, e **Filebeat** per raccogliere e inviare i log di sistema Linux direttamente a Elasticsearch per l'analisi.
 
-L'obiettivo di questo laboratorio è comprendere il flusso di dati in un SIEM: **raccolta**, **archiviazione** e **visualizzazione** dei log per scopi di monitoraggio e sicurezza.
 
----
 
-## Architettura del Lab
 
-Il setup prevede i seguenti componenti:
 
-* **Elasticsearch:** Il motore di ricerca distribuito e il database che indicizza e archivia i log.
-* **Kibana:** L'interfaccia utente web per visualizzare, analizzare e creare dashboard dai log archiviati in Elasticsearch.
-* **Filebeat:** Un "data shipper" leggero installato sulla macchina da cui raccogliere i log, che li invia direttamente a Elasticsearch.
-* **Docker & Docker Compose:** Strumenti usati per containerizzare e orchestrare Elasticsearch e Kibana, garantendo una configurazione rapida e isolata.
-
-```mermaid
-graph LR
-    A[Macchina Host - Filebeat] --> B(Docker Network)
-    B --> C[Elasticsearch Container]
-    B --> D[Kibana Container]
-    C --> D
 Prerequisiti
 Assicurati di avere i seguenti strumenti installati sulla tua macchina:
 
@@ -194,3 +172,4 @@ f. Clicca Create data view.
 
 6. Esplora i Log in Kibana
 Vai nel menu di sinistra e clicca sull'icona della bussola (Analytics) -> Discover. Dovresti vedere i tuoi log di sistema fluire in Kibana! Usa il selettore temporale in alto a destra per visualizzare i log più recenti.
+
