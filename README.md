@@ -21,6 +21,7 @@ graph LR
     B --> C[Elasticsearch Container]
     B --> D[Kibana Container]
     C --> D
+
 Prerequisiti
 Assicurati di avere i seguenti strumenti installati sulla tua macchina:
 
