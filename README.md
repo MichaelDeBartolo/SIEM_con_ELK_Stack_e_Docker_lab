@@ -15,23 +15,12 @@ Il setup prevede i seguenti componenti:
 * **Filebeat:** Un "data shipper" leggero installato sulla macchina da cui raccogliere i log, che li invia direttamente a Elasticsearch.
 * **Docker & Docker Compose:** Strumenti usati per containerizzare e orchestrare Elasticsearch e Kibana, garantendo una configurazione rapida e isolata.
 
-``>`mermaid
+```mermaid
 graph LR
     A[Macchina Host - Filebeat] --> B(Docker Network)
     B --> C[Elasticsearch Container]
     B --> D[Kibana Container]
     C --> D
-
-
-
-
-
-
-
-
-
-
-
 Prerequisiti
 Assicurati di avere i seguenti strumenti installati sulla tua macchina:
 
@@ -173,3 +162,15 @@ f. Clicca Create data view.
 6. Esplora i Log in Kibana
 Vai nel menu di sinistra e clicca sull'icona della bussola (Analytics) -> Discover. Dovresti vedere i tuoi log di sistema fluire in Kibana! Usa il selettore temporale in alto a destra per visualizzare i log più recenti.
 
+Spiegazione per un Colloquio Tecnico
+Quando presenti questo progetto, puoi spiegare i concetti chiave in questo modo:
+
+"Per questo laboratorio SIEM, ho configurato una pipeline semplificata utilizzando Elasticsearch e Kibana containerizzati con Docker, e Filebeat come agente di raccolta log.
+
+Filebeat agisce come un agente leggero, raccogliendo i log di sistema Linux (come auth.log e syslog) direttamente dalla mia macchina host.
+
+Questi log vengono quindi inviati direttamente a Elasticsearch, che si occupa dell'indicizzazione efficiente e dell'archiviazione dei dati, rendendoli rapidamente ricercabili.
+
+Kibana è l'interfaccia di visualizzazione e analisi, dove posso esplorare i log, filtrare eventi specifici (ad esempio, tentativi di login falliti) e, in un ambiente reale, creare dashboard personalizzate per il monitoraggio della sicurezza.
+
+Ho optato per questa configurazione diretta (Filebeat -> Elasticsearch) per questo laboratorio iniziale per garantire un funzionamento rapido e dimostrare chiaramente la pipeline di base di un SIEM. In un ambiente di produzione più complesso, avrei integrato Logstash tra Filebeat ed Elasticsearch. Logstash sarebbe fondamentale per il parsing avanzato, l'arricchimento dei dati e la normalizzazione dei log provenienti da diverse fonti, prima che vengano indicizzati in Elasticsearch. Questo permetterebbe correlazioni più sofisticate e un rilevamento più efficace delle minacce. Il mio interesse è proprio approfondire queste capacità di Logstash e la creazione di regole di parsing e correlazione avanzate."
