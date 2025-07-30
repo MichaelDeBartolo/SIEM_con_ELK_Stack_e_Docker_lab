@@ -15,29 +15,27 @@ Il setup prevede i seguenti componenti:
 * **Filebeat:** Un "data shipper" leggero installato sulla macchina da cui raccogliere i log, che li invia direttamente a Elasticsearch.
 * **Docker & Docker Compose:** Strumenti usati per containerizzare e orchestrare Elasticsearch e Kibana, garantendo una configurazione rapida e isolata.
 
-```mermaid
-graph LR
-    A[Macchina Host - Filebeat] --> B(Docker Network)
-    B --> C[Elasticsearch Container]
-    B --> D[Kibana Container]
-    C --> D
-Prerequisiti
+---
+
+## Prerequisiti
+
 Assicurati di avere i seguenti strumenti installati sulla tua macchina:
 
-Docker: Versione 20.10.0 o successiva.
+* **Docker:** Versione 20.10.0 o successiva.
+* **Docker Compose:** Versione v2.0.0 o successiva.
+* **Accesso `sudo`:** Necessario per l'installazione e la configurazione di Filebeat.
 
-Docker Compose: Versione v2.0.0 o successiva.
+---
 
-Accesso sudo: Necessario per l'installazione e la configurazione di Filebeat.
+## Setup del Lab
 
-Setup del Lab
 Segui questi passaggi per configurare il tuo ambiente SIEM:
 
-1. Prepara l'Ambiente Docker
+### 1. Prepara l'Ambiente Docker
+
 Crea una directory per il tuo progetto e naviga al suo interno:
 
-Bash
-
+```bash
 mkdir elk-siem-lab
 cd elk-siem-lab
 2. Crea il File docker-compose.yml
@@ -101,7 +99,7 @@ Installiamo Filebeat sulla macchina da cui vuoi raccogliere i log (la macchina h
 a. Installa Filebeat:
 Bash
 
-curl -L -O https://artifacts.elastic.co/downloads/beats/filebeat/filebeat-8.14.0-amd64.deb
+curl -L -O [https://artifacts.elastic.co/downloads/beats/filebeat/filebeat-8.14.0-amd64.deb](https://artifacts.elastic.co/downloads/beats/filebeat/filebeat-8.14.0-amd64.deb)
 sudo dpkg -i filebeat-8.14.0-amd64.deb
 b. Configura Filebeat:
 Modifica il file di configurazione principale di Filebeat:
@@ -161,16 +159,3 @@ f. Clicca Create data view.
 
 6. Esplora i Log in Kibana
 Vai nel menu di sinistra e clicca sull'icona della bussola (Analytics) -> Discover. Dovresti vedere i tuoi log di sistema fluire in Kibana! Usa il selettore temporale in alto a destra per visualizzare i log più recenti.
-
-Spiegazione per un Colloquio Tecnico
-Quando presenti questo progetto, puoi spiegare i concetti chiave in questo modo:
-
-"Per questo laboratorio SIEM, ho configurato una pipeline semplificata utilizzando Elasticsearch e Kibana containerizzati con Docker, e Filebeat come agente di raccolta log.
-
-Filebeat agisce come un agente leggero, raccogliendo i log di sistema Linux (come auth.log e syslog) direttamente dalla mia macchina host.
-
-Questi log vengono quindi inviati direttamente a Elasticsearch, che si occupa dell'indicizzazione efficiente e dell'archiviazione dei dati, rendendoli rapidamente ricercabili.
-
-Kibana è l'interfaccia di visualizzazione e analisi, dove posso esplorare i log, filtrare eventi specifici (ad esempio, tentativi di login falliti) e, in un ambiente reale, creare dashboard personalizzate per il monitoraggio della sicurezza.
-
-Ho optato per questa configurazione diretta (Filebeat -> Elasticsearch) per questo laboratorio iniziale per garantire un funzionamento rapido e dimostrare chiaramente la pipeline di base di un SIEM. In un ambiente di produzione più complesso, avrei integrato Logstash tra Filebeat ed Elasticsearch. Logstash sarebbe fondamentale per il parsing avanzato, l'arricchimento dei dati e la normalizzazione dei log provenienti da diverse fonti, prima che vengano indicizzati in Elasticsearch. Questo permetterebbe correlazioni più sofisticate e un rilevamento più efficace delle minacce. Il mio interesse è proprio approfondire queste capacità di Logstash e la creazione di regole di parsing e correlazione avanzate."
