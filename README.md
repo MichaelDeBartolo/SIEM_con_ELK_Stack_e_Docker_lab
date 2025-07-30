@@ -15,7 +15,7 @@ Il setup prevede i seguenti componenti:
 * **Filebeat:** Un "data shipper" leggero installato sulla macchina da cui raccogliere i log, che li invia direttamente a Elasticsearch.
 * **Docker & Docker Compose:** Strumenti usati per containerizzare e orchestrare Elasticsearch e Kibana, garantendo una configurazione rapida e isolata.
 
-```mermaid
+``>`mermaid
 graph LR
     A[Macchina Host - Filebeat] --> B(Docker Network)
     B --> C[Elasticsearch Container]
