@@ -101,7 +101,7 @@ Installiamo Filebeat sulla macchina da cui vuoi raccogliere i log (la macchina h
 a. Installa Filebeat:
 Bash
 
-curl -L -O [https://artifacts.elastic.co/downloads/beats/filebeat/filebeat-8.14.0-amd64.deb](https://artifacts.elastic.co/downloads/beats/filebeat/filebeat-8.14.0-amd64.deb)
+curl -L -O https://artifacts.elastic.co/downloads/beats/filebeat/filebeat-8.14.0-amd64.deb
 sudo dpkg -i filebeat-8.14.0-amd64.deb
 b. Configura Filebeat:
 Modifica il file di configurazione principale di Filebeat:
