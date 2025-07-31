@@ -7,7 +7,6 @@ L'obiettivo di questo laboratorio è comprendere il flusso di dati in un SIEM: *
 ---
 Indice
 ---
-SIEM Lab Semplificato con ELK Stack e Docker
 
 Architettura del Lab
 
