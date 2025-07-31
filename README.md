@@ -30,15 +30,17 @@ Assicurati di avere i seguenti strumenti installati sulla tua macchina:
 ## Setup del Lab
 
 Segui questi passaggi per configurare il tuo ambiente SIEM:
-
-### 1. Prepara l'Ambiente Docker
+```
+1. Prepara l'Ambiente Docker
 
 Crea una directory per il tuo progetto e naviga al suo interno:
 
-```bash
+[bash]
 mkdir elk-siem-lab
 cd elk-siem-lab
+
 2. Crea il File docker-compose.yml
+
 Crea un file chiamato docker-compose.yml all'interno della directory elk-siem-lab e incolla il seguente contenuto:
 
 YAML
@@ -80,33 +82,38 @@ volumes:
 networks:
   elk-network:
     driver: bridge
+
 3. Avvia lo Stack ELK
+
 Esegui questo comando nella stessa directory dove hai creato il file docker-compose.yml:
 
-Bash
-
+[Bash]
 docker compose up -d
+
 Verifica che entrambi i container siano attivi:
 
-Bash
-
+[Bash]
 docker compose ps
+
 Dovresti vedere elasticsearch e kibana con stato Up.
 
 4. Installa e Configura Filebeat
+
 Installiamo Filebeat sulla macchina da cui vuoi raccogliere i log (la macchina host):
 
 a. Installa Filebeat:
-Bash
 
+[Bash]
 curl -L -O [https://artifacts.elastic.co/downloads/beats/filebeat/filebeat-8.14.0-amd64.deb](https://artifacts.elastic.co/downloads/beats/filebeat/filebeat-8.14.0-amd64.deb)
 sudo dpkg -i filebeat-8.14.0-amd64.deb
+
 b. Configura Filebeat:
+
 Modifica il file di configurazione principale di Filebeat:
 
-Bash
-
+[Bash]
 sudo nano /etc/filebeat/filebeat.yml
+
 Assicurati che la sezione output.elasticsearch sia decommentata e configurata per puntare a localhost:9200. La sezione output.logstash deve essere commentata o rimossa.
 
 YAML
@@ -120,33 +127,34 @@ output.elasticsearch:
 
 # output.logstash: # Lascia questa sezione COMMENTATA per questo lab
 #   hosts: ["localhost:5044"]
+
 c. Abilita il Modulo system di Filebeat:
 Questo modulo raccoglie automaticamente i log di sistema Linux (es. /var/log/auth.log, /var/log/syslog).
 
-Bash
-
+[Bash]
 sudo filebeat modules enable system
+
 d. Correggi i Permessi (Passaggio Cruciale):
 Per prevenire problemi di scrittura, forza i permessi sulle directory chiave di Filebeat:
 
-Bash
-
+[Bash]
 sudo mkdir -p /var/lib/filebeat/registry/filebeat
 sudo mkdir -p /var/log/filebeat
 sudo chown -R root:root /etc/filebeat /var/lib/filebeat /var/log/filebeat
 sudo chmod -R 755 /etc/filebeat /var/lib/filebeat /var/log/filebeat
-e. Avvia Filebeat:
-Bash
 
+e. Avvia Filebeat:
+
+[Bash]
 sudo systemctl daemon-reload # Ricarica la configurazione di systemd
 sudo systemctl start filebeat
 sudo systemctl enable filebeat # Per avviarlo automaticamente all'avvio del sistema
 Verifica che Filebeat sia attivo e senza errori:
 
-Bash
-
+[Bash]
 sudo systemctl status filebeat
 sudo journalctl -u filebeat --since "2 minutes ago" # Controlla i log per errori
+
 5. Configurazione Iniziale in Kibana
 Rendi i log visibili in Kibana:
 
@@ -158,4 +166,5 @@ e. Seleziona @timestamp dal menu a discesa per il "Time field".
 f. Clicca Create data view.
 
 6. Esplora i Log in Kibana
-Vai nel menu di sinistra e clicca sull'icona della bussola (Analytics) -> Discover. Dovresti vedere i tuoi log di sistema fluire in Kibana! Usa il selettore temporale in alto a destra per visualizzare i log più recenti.
+Vai nel menu di sinistra e clicca sull'icona della bussola (Analytics) -> Discover.
+Dovresti vedere i tuoi log di sistema fluire in Kibana! Usa il selettore temporale in alto a destra per visualizzare i log più recenti.
