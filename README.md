@@ -135,6 +135,7 @@ Questo modulo raccoglie automaticamente i log di sistema Linux (es. /var/log/aut
 sudo filebeat modules enable system
 
 d. Correggi i Permessi (Passaggio Cruciale):
+
 Per prevenire problemi di scrittura, forza i permessi sulle directory chiave di Filebeat:
 
 [Bash]
@@ -156,6 +157,7 @@ sudo systemctl status filebeat
 sudo journalctl -u filebeat --since "2 minutes ago" # Controlla i log per errori
 
 5. Configurazione Iniziale in Kibana
+
 Rendi i log visibili in Kibana:
 
 a. Apri il browser e vai su http://localhost:5601.
