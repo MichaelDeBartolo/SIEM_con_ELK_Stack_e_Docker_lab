@@ -5,6 +5,27 @@ Questo repository illustra la configurazione di una pipeline SIEM (Security Info
 L'obiettivo di questo laboratorio è comprendere il flusso di dati in un SIEM: **raccolta**, **archiviazione** e **visualizzazione** dei log per scopi di monitoraggio e sicurezza.
 
 ---
+Indice
+---
+SIEM Lab Semplificato con ELK Stack e Docker
+
+Architettura del Lab
+
+Prerequisiti
+
+Setup del Lab
+
+1. Prepara l'Ambiente Docker
+
+2. Crea il File docker-compose.yml
+
+3. Avvia lo Stack ELK
+
+4. Installa e Configura Filebeat
+
+5. Configurazione Iniziale in Kibana
+
+6. Esplora i Log in Kibana
 
 ## Architettura del Lab
 
