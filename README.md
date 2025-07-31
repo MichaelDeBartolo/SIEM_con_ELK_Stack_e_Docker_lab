@@ -168,5 +168,6 @@ e. Seleziona @timestamp dal menu a discesa per il "Time field".
 f. Clicca Create data view.
 
 6. Esplora i Log in Kibana
+
 Vai nel menu di sinistra e clicca sull'icona della bussola (Analytics) -> Discover.
 Dovresti vedere i tuoi log di sistema fluire in Kibana! Usa il selettore temporale in alto a destra per visualizzare i log più recenti.
