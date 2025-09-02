@@ -1,4 +1,4 @@
-# SIEM Lab Semplificato con ELK Stack e Docker
+# SIEM Lab semplificato con ELK Stack e Docker
 
 Questo repository illustra la configurazione di una pipeline SIEM (Security Information and Event Management) di base. Utilizzeremo **Elasticsearch** e **Kibana** containerizzati con Docker, e **Filebeat** per raccogliere e inviare i log di sistema Linux direttamente a Elasticsearch per l'analisi.
 
