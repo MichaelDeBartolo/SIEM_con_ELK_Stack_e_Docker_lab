@@ -66,7 +66,9 @@ cd elk-siem-lab
 YAML
 
 services:
+
   elasticsearch:
+  
     image: docker.elastic.co/elasticsearch/elasticsearch:8.14.0
     container_name: elasticsearch
     environment:
@@ -85,6 +87,7 @@ services:
       - elk-network
 
   kibana:
+  
     image: docker.elastic.co/kibana/kibana:8.14.0
     container_name: kibana
     environment:
@@ -97,10 +100,13 @@ services:
       - elasticsearch 
 
 volumes:
+
   esdata: 
 
 networks:
+
   elk-network:
+  
     driver: bridge
 
 ## 3. Avvia lo Stack ELK
@@ -141,11 +147,15 @@ YAML
 # ---------------------------- Outputs -----------------------------
 
 output.elasticsearch:
+
   hosts: ["localhost:9200"] 
+  
   #username: "elastic" 
+  
   #password: "changeme" 
 
 output.logstash: 
+
 hosts: ["localhost:5044"]
 
 **c. Abilita il Modulo system di Filebeat:**
