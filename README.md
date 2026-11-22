@@ -1,87 +1,66 @@
-# SIEM Lab semplificato con ELK Stack e Docker
+# SIEM Lab Semplificato con ELK Stack e Docker — Guida Passo Passo
 
-Questo repository illustra la configurazione di una pipeline **SIEM** (Security Information and Event Management) di base. Utilizziamo **Elasticsearch** e **Kibana** containerizzati con Docker, e **Filebeat** per raccogliere e inviare i log di sistema Linux direttamente a Elasticsearch per l'analisi.
+Guida pratica di **Security Information and Event Management (SIEM)** e centralizzazione dei log su Linux con **Elasticsearch**, **Kibana** (in container Docker) e **Filebeat** (sull'host).  
+L'obiettivo di questo laboratorio è mostrare come raccogliere i log di sistema Linux, inviarli a un motore di ricerca centralizzato e visualizzarli in una dashboard per monitoraggio, analisi e triage di sicurezza.
 
-**Obiettivo del laboratorio:** comprendere il flusso di dati in un SIEM attraverso tre fasi principali:
-1. **Raccolta** dei log
-2. **Archiviazione** centralizzata
-3. **Visualizzazione** per monitoraggio e sicurezza
+> **Nota sul perimetro e sulla sicurezza:** Questo setup disabilita la sicurezza (`xpack.security.enabled=false`) per semplificare l'apprendimento in laboratorio locale. Non utilizzare mai questa configurazione in produzione o su reti esposte: in ambienti reali vanno abilitati autenticazione, TLS/HTTPS e controllo degli accessi.
 
 ---
 
-## 📑 Indice
+## Cosa fa in breve un SIEM (e perché si parte da qui)
 
-- [Architettura del Lab](#architettura-del-lab)
-- [Prerequisiti](#prerequisiti)
-- [Setup del Lab](#setup-del-lab)
-  - [1. Prepara l'Ambiente Docker](#1-prepara-lambiente-docker)
-  - [2. Crea il File docker-compose.yml](#2-crea-il-file-docker-composeyml)
-  - [3. Avvia lo Stack ELK](#3-avvia-lo-stack-elk)
-  - [4. Installa e Configura Filebeat](#4-installa-e-configura-filebeat)
-  - [5. Configurazione Iniziale in Kibana](#5-configurazione-iniziale-in-kibana)
-  - [6. Esplora i Log in Kibana](#6-esplora-i-log-in-kibana)
+Immagina di dover investigare un tentativo di accesso sospetto o un errore di sistema su una macchina Linux: se i log restano sparsi in file diversi e senza un punto di consultazione unificato, la ricerca diventa lenta e frammentata.
+* **Filebeat (raccolta):** legge i file di log dalla macchina host (come autenticazione e log di sistema) e li spedisce in modo affidabile.
+* **Elasticsearch (archiviazione e indicizzazione):** riceve, indicizza e conserva i log per poterli cercare e filtrare velocemente.
+* **Kibana (visualizzazione):** offre l'interfaccia web per esplorare gli eventi, filtrare per intervallo temporale e costruire viste/dashboard.
+
+Partire con uno stack locale semplificato permette di capire il flusso completo dei dati in un SIEM senza perdersi subito nella complessità di un cluster multi-nodo di produzione.
 
 ---
 
-## 🏗️ Architettura del Lab
+## Architettura e Prerequisiti
 
-Il setup prevede i seguenti componenti:
+### Prerequisiti
+* **Docker:** versione `20.10.0` o successiva.
+* **Docker Compose:** versione `v2.0.0` o successiva.
+* **Permessi `sudo`:** necessari per installare e avviare Filebeat sull'host.
 
-| Componente | Descrizione |
-|-----------|-------------|
-| **Elasticsearch** | Motore di ricerca distribuito e database che indicizza e archivia i log |
-| **Kibana** | Interfaccia utente web per visualizzare, analizzare e creare dashboard dai log |
-| **Filebeat** | Data shipper leggero che raccoglie i log dalla macchina host e li invia a Elasticsearch |
-| **Docker & Docker Compose** | Strumenti per containerizzare e orchestrare i servizi |
+### Componenti del laboratorio
 
-```
+| Componente | Ruolo | Funzione nel laboratorio |
+| :--- | :--- | :--- |
+| **Elasticsearch** | Motore di ricerca e storage | Indicizza e archivia i log ricevuti (`8.14.0`, porta `9200`) |
+| **Kibana** | Interfaccia web | Consente di esplorare i log e creare Data View (`8.14.0`, porta `5601`) |
+| **Filebeat** | Log shipper sull'host | Raccoglie i log di sistema Linux e li invia a Elasticsearch (`8.14.0`) |
+| **Docker & Compose** | Orchestrazione container | Gestisce rete, volumi e ciclo di vita di Elasticsearch e Kibana |
+
+### Schema del flusso dati
+
+```text
 ┌─────────────┐
-│  Filebeat   │ (Log Collector)
+│  Filebeat   │ (Log Collector sull'host)
 └──────┬──────┘
        │
-       │ Invia log
-       │
+       │ Invia log (HTTP / 9200)
        ▼
 ┌──────────────────┐        ┌─────────┐
 │ Elasticsearch    │◄──────►│ Kibana  │
-│ (Index & Store) │        │ (UI)    │
+│ (Index & Store)  │        │ (UI)    │
 └──────────────────┘        └─────────┘
 ```
+## Passo 1 — Preparare la Directory e Creare `docker-compose.yml`
 
----
-
-## ✅ Prerequisiti
-
-Assicurati di avere installato sulla tua macchina:
-
-- **Docker** — versione 20.10.0 o successiva
-- **Docker Compose** — versione v2.0.0 o successiva
-- **Accesso `sudo`** — necessario per l'installazione di Filebeat
-
----
-
-## 🚀 Setup del Lab
-
-Segui questi passaggi per configurare il tuo ambiente SIEM.
-
-### 1. Prepara l'Ambiente Docker
-
-Crea una directory per il progetto e accedici:
-
+### 1.1 Crea la cartella del progetto
 ```bash
 mkdir elk-siem-lab
 cd elk-siem-lab
 ```
 
----
-
-### 2. Crea il File docker-compose.yml
-
-Crea un file denominato `docker-compose.yml` all'interno della directory `elk-siem-lab`:
+### 1.2 Crea il file `docker-compose.yml`
+Crea il file `docker-compose.yml` all'interno della cartella `elk-siem-lab`:
 
 ```yaml
 services:
-
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:8.14.0
     container_name: elasticsearch
@@ -120,55 +99,45 @@ networks:
     driver: bridge
 ```
 
-**Variabili principali:**
-- `xpack.security.enabled=false`: Disabilita la sicurezza (solo per lab)
-- `discovery.type=single-node`: Elasticsearch in modalità single-node
-- `ES_JAVA_OPTS`: Allocazione memoria JVM (512MB min e max)
+### Come leggere le variabili principali
+* **`xpack.security.enabled=false`**: disabilita le funzionalità di sicurezza di X-Pack per semplificare i test locali.
+* **`discovery.type=single-node`**: avvia Elasticsearch in modalità a singolo nodo.
+* **`ES_JAVA_OPTS=-Xms512m -Xmx512m`**: imposta memoria minima e massima della JVM a `512 MB` per contenere l'uso risorse in laboratorio.
 
 ---
 
-### 3. Avvia lo Stack ELK
+## Passo 2 — Avviare lo Stack ELK
 
-Esegui questo comando nella directory dove hai creato `docker-compose.yml`:
+Dalla directory `elk-siem-lab`, avvia i container in background:
 
 ```bash
 docker compose up -d
 ```
 
-**Verifica che i container siano attivi:**
+### Verifica del passaggio
+Controlla lo stato dei servizi con:
 
 ```bash
 docker compose ps
 ```
-
-Dovresti vedere `elasticsearch` e `kibana` con stato **Up**.
+Entrambi i container (`elasticsearch` e `kibana`) devono risultare attivi (`Up`).
 
 ---
+## Passo 3 — Installare, Configurare e Avviare Filebeat
 
-### 4. Installa e Configura Filebeat
+Filebeat viene installato sulla macchina host per leggere i log di sistema e inviarli a Elasticsearch.
 
-Installa Filebeat sulla macchina host (dove vuoi raccogliere i log).
-
-#### a. Installa Filebeat
-
+### 3.1 Installazione del pacchetto `.deb`
 ```bash
-curl -L -O https://artifacts.elastic.co/downloads/beats/filebeat/filebeat-8.14.0-amd64.deb
+curl -L -O [https://artifacts.elastic.co/downloads/beats/filebeat/filebeat-8.14.0-amd64.deb](https://artifacts.elastic.co/downloads/beats/filebeat/filebeat-8.14.0-amd64.deb)
 sudo dpkg -i filebeat-8.14.0-amd64.deb
 ```
 
-#### b. Configura Filebeat
-
-Modifica il file di configurazione principale:
-
-```bash
-sudo nano /etc/filebeat/filebeat.yml
-```
-
-Assicurati che la sezione `output.elasticsearch` sia decommentata e configurata per puntare a `localhost:9200`. La sezione `output.logstash` deve essere commentata:
+### 3.2 Configurazione dell'output in `/etc/filebeat/filebeat.yml`
+Apri `/etc/filebeat/filebeat.yml` con un editor (ad esempio `sudo nano /etc/filebeat/filebeat.yml`) e verifica che la sezione `output.elasticsearch` punti a `localhost:9200`, lasciando commentato `output.logstash`:
 
 ```yaml
 # ========================== Outputs ==========================
-
 output.elasticsearch:
   hosts: ["localhost:9200"]
   # username: "elastic"
@@ -178,17 +147,15 @@ output.elasticsearch:
 #   hosts: ["localhost:5044"]
 ```
 
-#### c. Abilita il Modulo system di Filebeat
-
-Questo modulo raccoglie automaticamente i log di sistema Linux (es. `/var/log/auth.log`, `/var/log/syslog`):
+### 3.3 Abilitazione del modulo `system`
+Abilita il modulo dedicato ai log di sistema Linux:
 
 ```bash
 sudo filebeat modules enable system
 ```
 
-#### d. Correggi i Permessi (Cruciale!)
-
-Per prevenire problemi di scrittura, imposta i permessi corretti:
+### 3.4 Preparazione directory e permessi
+Crea le cartelle necessarie e allinea proprietà e permessi:
 
 ```bash
 sudo mkdir -p /var/lib/filebeat/registry/filebeat
@@ -198,15 +165,15 @@ sudo chown -R root:root /etc/filebeat /var/lib/filebeat /var/log/filebeat
 sudo chmod -R 755 /etc/filebeat /var/lib/filebeat /var/log/filebeat
 ```
 
-#### e. Avvia Filebeat
-
+### 3.5 Avvio e verifica del servizio Filebeat
 ```bash
 sudo systemctl daemon-reload
 sudo systemctl start filebeat
 sudo systemctl enable filebeat
 ```
 
-**Verifica lo stato di Filebeat:**
+### Verifica del passaggio
+Controlla stato e log recenti del servizio:
 
 ```bash
 sudo systemctl status filebeat
@@ -215,64 +182,39 @@ sudo journalctl -u filebeat --since "2 minutes ago"
 
 ---
 
-### 5. Configurazione Iniziale in Kibana
+## Passo 4 — Configurare la Data View e Esplorare i Log in Kibana
 
-Rendi i log visibili in Kibana seguendo questi passaggi:
+### 4.1 Creare la Data View in Kibana
+1. Apri il browser all'indirizzo `http://localhost:5601`.
+2. Nel menu laterale sinistro, apri **Management** (icona dell'ingranaggio) → **Stack Management** → **Data Views** (o **Index Patterns** nelle versioni precedenti).
+3. Clicca su **Create data view**.
+4. In **Name / Index pattern**, inserisci `filebeat-*`.
+5. Seleziona `@timestamp` come **Timestamp field**.
+6. Conferma cliccando su **Create data view**.
 
-1. Apri il browser e accedi a **http://localhost:5601**
-2. Nel menu di sinistra, fai clic sull'icona dell'ingranaggio ⚙️ (**Management**)
-3. Seleziona **Stack Management** → **Index Patterns** (o **Data Views** nelle versioni più recenti)
-4. Clicca su **Create data view**
-5. Nel campo *"Index pattern name"*, digita: `filebeat-*`
-6. Seleziona `@timestamp` dal dropdown per il *"Time field"*
-7. Clicca su **Create data view**
-
----
-
-### 6. Esplora i Log in Kibana
-
-1. Nel menu di sinistra, clicca sull'icona della bussola 🧭 (**Analytics**)
-2. Seleziona **Discover**
-
-Dovresti vedere i tuoi log di sistema fluire in Kibana! Usa il selettore temporale in alto a destra per visualizzare i log più recenti.
+### 4.2 Visualizzare i log in Discover
+1. Nel menu laterale sinistro, apri **Analytics** (icona della bussola) → **Discover**.
+2. Seleziona la data view `filebeat-*` e imposta l'intervallo temporale in alto a destra (es. ultimi 15 minuti) per osservare i log di sistema in arrivo.
 
 ---
 
-## 🔍 Troubleshooting
+## Troubleshooting Rapido
 
-### I log non compaiono in Kibana
-
-- Verifica che Filebeat sia in esecuzione: `sudo systemctl status filebeat`
-- Controlla i log di Filebeat: `sudo journalctl -u filebeat -n 50`
-- Assicurati che Elasticsearch sia accessibile da Filebeat: `curl http://localhost:9200`
-
-### Container Docker non avviati
-
-```bash
-docker compose logs elasticsearch
-docker compose logs kibana
-```
-
-### Errori di permessi in Filebeat
-
-Ripeti il passaggio **4.d** per correggere i permessi delle directory di Filebeat.
+* **I log non compaiono in Kibana:**
+  * Controlla lo stato di Filebeat: `sudo systemctl status filebeat`
+  * Ispeziona i log di Filebeat: `sudo journalctl -u filebeat -n 50`
+  * Verifica che Elasticsearch risponda su `9200`: `curl http://localhost:9200`
+* **Problemi con i container Docker:**
+  * Controlla i log dei servizi: `docker compose logs elasticsearch` e `docker compose logs kibana`
+* **Errori legati a permessi o directory di Filebeat:**
+  * Riesegui i comandi del **Passo 3.4** per ripristinare directory, proprietà e permessi.
 
 ---
 
-## 📚 Risorse Aggiuntive
+## Competenze Dimostrate in Questo Laboratorio
 
-- [Documentazione Elasticsearch](https://www.elastic.co/guide/en/elasticsearch/reference/current/index.html)
-- [Documentazione Kibana](https://www.elastic.co/guide/en/kibana/current/index.html)
-- [Documentazione Filebeat](https://www.elastic.co/guide/en/beats/filebeat/current/index.html)
-
----
-
-## 📝 Note
-
-- Questo setup è **semplificato** e pensato per scopi didattici
-- Non abilitare in produzione senza implementare proper security (SSL/TLS, autenticazione, etc.)
-- Per ambienti di produzione, consulta la documentazione ufficiale di Elastic
+* Orchestrazione di un ambiente di analisi log tramite **Docker Compose** con Elasticsearch e Kibana.
+* Configurazione di **Filebeat** sull'host con modulo `system` e invio degli eventi verso Elasticsearch.
+* Creazione di una Data View su `@timestamp` e esplorazione dei log in **Kibana Discover** per attività di monitoraggio e triage.
 
 ---
-
-**Creato per scopi educativi di SIEM Lab** 🔐
