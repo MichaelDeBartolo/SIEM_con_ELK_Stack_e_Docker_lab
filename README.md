@@ -1,4 +1,4 @@
-# SIEM Lab Semplificato con ELK Stack e Docker — Guida Passo Passo
+# Lab SIEM con ELK Stack e Docker 
 
 Guida pratica di **Security Information and Event Management (SIEM)** e centralizzazione dei log su Linux con **Elasticsearch**, **Kibana** (in container Docker) e **Filebeat** (sull'host).  
 L'obiettivo di questo laboratorio è mostrare come raccogliere i log di sistema Linux, inviarli a un motore di ricerca centralizzato e visualizzarli in una dashboard per monitoraggio, analisi e triage di sicurezza.
